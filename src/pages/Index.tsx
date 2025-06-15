@@ -1,10 +1,8 @@
 
 import React, { useState } from 'react';
-import { Settings, Building2, Clock, Calendar, Link2, CreditCard } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { SettingsSidebar } from '@/components/layout/SettingsSidebar';
 import { SalonProfileSettings } from '@/components/salon/SalonProfileSettings';
 import { BusinessHoursSettings } from '@/components/salon/BusinessHoursSettings';
 import { OnlineBookingSettings } from '@/components/salon/OnlineBookingSettings';
@@ -12,105 +10,82 @@ import { IntegrationsSettings } from '@/components/salon/IntegrationsSettings';
 import { SubscriptionBilling } from '@/components/salon/SubscriptionBilling';
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeView, setActiveView] = useState('profile');
+
+  const renderContent = () => {
+    switch (activeView) {
+      case 'profile':
+        return <SalonProfileSettings />;
+      case 'hours':
+        return <BusinessHoursSettings />;
+      case 'booking':
+        return <OnlineBookingSettings />;
+      case 'integrations':
+        return <IntegrationsSettings />;
+      case 'billing':
+        return <SubscriptionBilling />;
+      default:
+        return <SalonProfileSettings />;
+    }
+  };
+
+  const pageConfig = {
+    profile: {
+      title: "Salon Profile",
+      description: "Manage your salon's identity and branding.",
+    },
+    hours: {
+      title: "Business Hours",
+      description: "Set your standard business hours and special closures.",
+    },
+    booking: {
+      title: "Online Booking",
+      description: "Configure how clients can book appointments online.",
+    },
+    integrations: {
+      title: "Integrations",
+      description: "Connect BeautyHub with your favorite tools.",
+    },
+    billing: {
+      title: "Subscription & Billing",
+      description: "Manage your BeautyHub subscription and view invoices.",
+    }
+  };
+
+  const { title, description } = pageConfig[activeView] || pageConfig.profile;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
-      {/* Header */}
-      <header className="bg-white border-b border-orange-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-orange-600 rounded-lg flex items-center justify-center">
-                <Building2 className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">BeautyHub</h1>
-                <p className="text-sm text-gray-500">Salon Control Center</p>
+    <SidebarProvider>
+      <div className="min-h-screen w-full bg-gradient-to-br from-orange-50 via-white to-orange-50 flex">
+        <SettingsSidebar activeView={activeView} setActiveView={setActiveView} />
+        <div className="flex-1 flex flex-col">
+          <header className="bg-white border-b border-orange-100 shadow-sm sticky top-0 z-10">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex justify-between items-center h-16">
+                 <div className="flex items-center gap-4">
+                    <SidebarTrigger className="lg:hidden" />
+                    <div>
+                        <h1 className="text-xl font-bold text-gray-900">{title}</h1>
+                        <p className="text-sm text-gray-500">{description}</p>
+                    </div>
+                 </div>
+                <div className="flex items-center space-x-3">
+                  <Badge variant="secondary" className="bg-green-100 text-green-800">
+                    Pro Plan
+                  </Badge>
+                  <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                    <span className="text-sm font-medium text-orange-800">SA</span>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="flex items-center space-x-3">
-              <Badge variant="secondary" className="bg-green-100 text-green-800">
-                Pro Plan
-              </Badge>
-              <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
-                <span className="text-sm font-medium text-orange-800">SA</span>
-              </div>
-            </div>
-          </div>
+          </header>
+          <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+            {renderContent()}
+          </main>
         </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings Hub</h1>
-          <p className="text-gray-600">
-            Configure your salon's operational rules and identity within BeautyHub
-          </p>
-        </div>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 h-12 bg-white border border-orange-100">
-            <TabsTrigger 
-              value="profile" 
-              className="flex items-center space-x-2 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700"
-            >
-              <Building2 className="w-4 h-4" />
-              <span className="hidden sm:inline">Salon Profile</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="hours" 
-              className="flex items-center space-x-2 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700"
-            >
-              <Clock className="w-4 h-4" />
-              <span className="hidden sm:inline">Business Hours</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="booking" 
-              className="flex items-center space-x-2 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700"
-            >
-              <Calendar className="w-4 h-4" />
-              <span className="hidden sm:inline">Online Booking</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="integrations" 
-              className="flex items-center space-x-2 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700"
-            >
-              <Link2 className="w-4 h-4" />
-              <span className="hidden sm:inline">Integrations</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="billing" 
-              className="flex items-center space-x-2 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700"
-            >
-              <CreditCard className="w-4 h-4" />
-              <span className="hidden sm:inline">Subscription</span>
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="profile" className="space-y-6">
-            <SalonProfileSettings />
-          </TabsContent>
-
-          <TabsContent value="hours" className="space-y-6">
-            <BusinessHoursSettings />
-          </TabsContent>
-
-          <TabsContent value="booking" className="space-y-6">
-            <OnlineBookingSettings />
-          </TabsContent>
-
-          <TabsContent value="integrations" className="space-y-6">
-            <IntegrationsSettings />
-          </TabsContent>
-
-          <TabsContent value="billing" className="space-y-6">
-            <SubscriptionBilling />
-          </TabsContent>
-        </Tabs>
-      </main>
-    </div>
+      </div>
+    </SidebarProvider>
   );
 };
 
