@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -149,8 +148,7 @@ export const BusinessHoursSettings = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">Business Hours & Closures</h2>
+      <div className="flex items-center justify-end">
         <Button onClick={handleSave} className="bg-orange-500 hover:bg-orange-600">
           Save All Changes
         </Button>

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Sidebar,
   SidebarContent,
@@ -7,16 +7,39 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarHeader,
-  useSidebar
+  useSidebar,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from '@/components/ui/sidebar';
-import { Building2, Clock, Calendar, Link2, CreditCard } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Building2, Clock, Calendar, Link2, CreditCard, LayoutGrid, Package, ClipboardList, Users, Settings, ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-const menuItems = [
-  { id: 'profile', label: 'Salon Profile', icon: Building2 },
-  { id: 'hours', label: 'Business Hours', icon: Clock },
-  { id: 'booking', label: 'Online Booking', icon: Calendar },
-  { id: 'integrations', label: 'Integrations', icon: Link2 },
-  { id: 'billing', label: 'Subscription', icon: CreditCard },
+const menuConfig = [
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid, path: 'dashboard' },
+  { 
+    id: 'business', 
+    label: 'Business', 
+    icon: Building2,
+    children: [
+      { id: 'profile', label: 'Salon Profile', path: 'business/profile' },
+      { id: 'hours', label: 'Business Hours', path: 'business/hours' },
+      { id: 'booking', label: 'Online Booking', path: 'business/booking' },
+    ]
+  },
+  { id: 'products', label: 'Products', icon: Package, path: 'products' },
+  { id: 'services', label: 'Services', icon: ClipboardList, path: 'services' },
+  { id: 'staff', label: 'Staff Management', icon: Users, path: 'staff' },
+  {
+    id: 'settings',
+    label: 'Settings',
+    icon: Settings,
+    children: [
+      { id: 'integrations', label: 'Integrations', path: 'settings/integrations' },
+      { id: 'billing', label: 'Subscription', path: 'settings/billing' },
+    ]
+  }
 ];
 
 interface SettingsSidebarProps {
@@ -26,9 +49,10 @@ interface SettingsSidebarProps {
 
 export const SettingsSidebar = ({ activeView, setActiveView }: SettingsSidebarProps) => {
   const { setOpenMobile, isMobile } = useSidebar();
+  const [openMenu, setOpenMenu] = useState('business');
 
-  const handleItemClick = (id: string) => {
-    setActiveView(id);
+  const handleItemClick = (path: string) => {
+    setActiveView(path);
     if (isMobile) {
       setOpenMobile(false);
     }
@@ -48,17 +72,51 @@ export const SettingsSidebar = ({ activeView, setActiveView }: SettingsSidebarPr
             </div>
         </SidebarHeader>
         <SidebarMenu className="p-2 pt-4">
-          {menuItems.map((item) => (
+          {menuConfig.map((item) => (
             <SidebarMenuItem key={item.id}>
-              <SidebarMenuButton
-                onClick={() => handleItemClick(item.id)}
-                isActive={activeView === item.id}
-                tooltip={item.label}
-                className="data-[active=true]:bg-orange-50 data-[active=true]:text-orange-700 hover:bg-orange-50"
-              >
-                <item.icon className="h-5 w-5" />
-                <span>{item.label}</span>
-              </SidebarMenuButton>
+              {item.children ? (
+                <Collapsible open={openMenu === item.id} onOpenChange={(isOpen) => setOpenMenu(isOpen ? item.id : '')}>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton
+                      isActive={activeView.startsWith(item.id)}
+                      tooltip={item.label}
+                      className="data-[active=true]:bg-orange-50 data-[active=true]:text-orange-700 hover:bg-orange-50 w-full justify-between"
+                    >
+                      <div className="flex items-center gap-2">
+                        <item.icon className="h-5 w-5" />
+                        <span>{item.label}</span>
+                      </div>
+                      <ChevronDown className={cn("h-4 w-4 transition-transform", openMenu === item.id && "rotate-180")} />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub className="ml-0 pl-4 py-1">
+                      {item.children.map((child) => (
+                        <SidebarMenuSubItem key={child.id}>
+                          <SidebarMenuButton
+                            onClick={() => handleItemClick(child.path)}
+                            isActive={activeView === child.path}
+                            tooltip={child.label}
+                            className="h-8 data-[active=true]:bg-orange-50 data-[active=true]:text-orange-700 hover:bg-orange-50"
+                          >
+                           <span>{child.label}</span>
+                          </SidebarMenuButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
+              ) : (
+                <SidebarMenuButton
+                  onClick={() => handleItemClick(item.path)}
+                  isActive={activeView === item.path}
+                  tooltip={item.label}
+                  className="data-[active=true]:bg-orange-50 data-[active=true]:text-orange-700 hover:bg-orange-50"
+                >
+                  <item.icon className="h-5 w-5" />
+                  <span>{item.label}</span>
+                </SidebarMenuButton>
+              )}
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
