@@ -66,17 +66,21 @@ export const ProductDetailsForm = ({
         <div className="space-y-2">
           <Label htmlFor="supplier">Supplier</Label>
           <Select
-            value={selectedSupplier?.id || ''}
+            value={selectedSupplier?.id || 'none'}
             onValueChange={(value) => {
-              const supplier = suppliers.find(s => s.id === value);
-              setValue('supplier', supplier);
+              if (value === 'none') {
+                setValue('supplier', undefined);
+              } else {
+                const supplier = suppliers.find(s => s.id === value);
+                setValue('supplier', supplier);
+              }
             }}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select supplier" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">No supplier</SelectItem>
+              <SelectItem value="none">No supplier</SelectItem>
               {suppliers.map(supplier => (
                 <SelectItem key={supplier.id} value={supplier.id}>
                   {supplier.name}
