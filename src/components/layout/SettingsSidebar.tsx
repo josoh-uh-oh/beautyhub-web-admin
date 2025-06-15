@@ -31,6 +31,7 @@ const menuConfig = [
   },
   { id: 'products', label: 'Products', icon: Package, path: 'products' },
   { id: 'services', label: 'Services', icon: ClipboardList, path: 'services' },
+  { id: 'crm', label: 'Customers', icon: Users, path: 'crm' }, // <-- added here
   { id: 'staff', label: 'Staff Management', icon: Users, path: 'staff' },
   {
     id: 'settings',

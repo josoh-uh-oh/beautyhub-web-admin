@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
@@ -13,6 +12,7 @@ import { Calendar } from '@/components/salon/Calendar';
 import { Products } from '@/components/salon/Products';
 import { Services } from '@/components/salon/Services';
 import { StaffManagement } from '@/components/salon/StaffManagement';
+import { CustomerList } from '@/components/salon/customers/CustomerList';
 
 const Index = () => {
   const [activeView, setActiveView] = useState('dashboard');
@@ -35,6 +35,8 @@ const Index = () => {
         return <Services />;
       case 'staff':
         return <StaffManagement />;
+      case 'crm':
+        return <CustomerList />;
       case 'settings/integrations':
         return <IntegrationsSettings />;
       case 'settings/billing':
@@ -76,6 +78,10 @@ const Index = () => {
     staff: {
       title: "Staff Management",
       description: "Manage your team members and their roles.",
+    },
+    crm: {
+      title: "お客様カルテ (Customers)",
+      description: "顧客管理および日本式カルテ統合管理。"
     },
     'settings/integrations': {
       title: "Integrations",

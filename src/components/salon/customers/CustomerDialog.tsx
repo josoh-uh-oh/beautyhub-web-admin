@@ -1,0 +1,147 @@
+
+import React, { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
+import { Tabs, TabList, Tab, TabPanel } from "@radix-ui/react-tabs";
+import { Customer } from "@/types/customer";
+
+interface Props {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  customer: Customer | null;
+}
+
+const tabs = [
+  { key: "overview", label: "カルテ (Overview)" },
+  { key: "history", label: "履歴 (History)" },
+  { key: "photos", label: "写真 (Photos)" },
+  { key: "notes", label: "メモ (Notes)" },
+];
+
+export const CustomerDialog = ({ open, onOpenChange, customer }: Props) => {
+  const [tab, setTab] = useState("overview");
+
+  if (!customer) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl w-full">
+        <DialogHeader>
+          <DialogTitle>
+            {customer.name} <span className="text-gray-500 ml-2">{customer.nameKana}</span>
+          </DialogTitle>
+        </DialogHeader>
+        <div className="pt-3">
+          <Tabs value={tab} onValueChange={setTab}>
+            <TabList className="flex gap-4 border-b mb-4">
+              {tabs.map(t => (
+                <Tab key={t.key} value={t.key} className={tab === t.key ? "border-b-2 border-orange-400 font-bold" : ""}>
+                  {t.label}
+                </Tab>
+              ))}
+            </TabList>
+
+            <TabPanel value="overview">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <div className="mb-1 text-gray-500">電話番号 / Email</div>
+                  <div>{customer.phone} / {customer.email ?? "—"}</div>
+                  <div className="mt-2 text-gray-500">住所</div>
+                  <div>{customer.address ?? "—"}</div>
+                </div>
+                <div>
+                  <div className="mb-1 text-gray-500">会員登録日</div>
+                  <div>{customer.memberSince ?? "—"}</div>
+                  <div className="mt-2 text-gray-500">タグ</div>
+                  <div>{(customer.tags || []).join(", ") || "—"}</div>
+                </div>
+              </div>
+              <div className="mt-4">
+                <KaruteSection karute={customer.karute} />
+              </div>
+            </TabPanel>
+
+            <TabPanel value="history">
+              <HistorySection history={customer.history ?? []} />
+            </TabPanel>
+
+            <TabPanel value="photos">
+              <PhotosSection photos={customer.photos ?? []} />
+            </TabPanel>
+
+            <TabPanel value="notes">
+              <NotesSection notes={customer.notes ?? []} />
+            </TabPanel>
+          </Tabs>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// Individual tab sections:
+const KaruteSection = ({ karute }: { karute?: any }) => {
+  if (!karute) return <div className="text-gray-400">No Karute info.</div>;
+  return (
+    <div className="border border-orange-100 rounded p-3 bg-orange-50">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-x-3 gap-y-2">
+        <div><span className="text-xs text-gray-500">アレルギー</span><br/>{karute.allergies || "—"}</div>
+        <div><span className="text-xs text-gray-500">髪質</span><br/>{karute.hairType || "—"}</div>
+        <div><span className="text-xs text-gray-500">頭皮状態</span><br/>{karute.scalpCondition || "—"}</div>
+        <div><span className="text-xs text-gray-500">肌質</span><br/>{karute.skinType || "—"}</div>
+      </div>
+      <div className="mt-2 text-xs text-gray-400">備考: {karute.memo || "—"}</div>
+    </div>
+  );
+};
+
+const HistorySection = ({ history }: { history: any[] }) => (
+  <div>
+    {history.length === 0 ? <div className="text-gray-400">History is empty.</div> : (
+      <ul className="divide-y">
+        {history.map(h => (
+          <li key={h.id} className="py-2">
+            <div className="font-semibold">{h.service}</div>
+            <div className="text-xs text-gray-500">{h.date} / 担当: {h.staff}</div>
+            {h.notes && <div className="mt-1 text-sm">{h.notes}</div>}
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+);
+
+const PhotosSection = ({ photos }: { photos: any[] }) => (
+  <div>
+    {photos.length === 0 ? (
+      <div className="text-gray-400">No photos yet.</div>
+    ) : (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        {photos.map((p) => (
+          <div key={p.id} className="rounded border overflow-hidden">
+            <img src={p.url} alt={p.description || "photo"} className="object-cover w-full h-24" />
+            <div className="p-1 text-xs text-gray-500">{p.date} {p.type && `(${p.type})`}</div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+);
+
+const NotesSection = ({ notes }: { notes: any[] }) => (
+  <div>
+    {notes.length === 0 ? (
+      <div className="text-gray-400">No notes yet.</div>
+    ) : (
+      <ul>
+        {notes.map((n) => (
+          <li key={n.id} className="border mb-2 p-2 rounded">
+            <div className="text-xs text-gray-500">{n.date} / {n.author}</div>
+            <div>{n.content}</div>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+);
+
+export default CustomerDialog;
