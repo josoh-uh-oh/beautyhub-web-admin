@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UseFormRegister, UseFormSetValue, UseFormWatch, FieldErrors } from 'react-hook-form';
 import { ProductFormData, ProductSupplier } from '@/types/product';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface ProductDetailsFormProps {
   register: UseFormRegister<ProductFormData>;
@@ -25,28 +26,29 @@ export const ProductDetailsForm = ({
 }: ProductDetailsFormProps) => {
   const selectedSupplier = watch('supplier');
   const status = watch('status');
+  const { t } = useLanguage();
 
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="category">Category *</Label>
+          <Label htmlFor="category">{t('categoryLabel')}</Label>
           <Select
             value={watch('category')}
             onValueChange={(value) => setValue('category', value)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select category" />
+              <SelectValue placeholder={t('selectCategory')} />
             </SelectTrigger>
             <SelectContent>
               {categories.map(category => (
                 <SelectItem key={category} value={category}>{category}</SelectItem>
               ))}
-              <SelectItem value="Hair Care">Hair Care</SelectItem>
-              <SelectItem value="Skin Care">Skin Care</SelectItem>
-              <SelectItem value="Nail Care">Nail Care</SelectItem>
-              <SelectItem value="Makeup">Makeup</SelectItem>
-              <SelectItem value="Tools">Tools</SelectItem>
+              <SelectItem value="Hair Care">{t('hairCare')}</SelectItem>
+              <SelectItem value="Skin Care">{t('skinCare')}</SelectItem>
+              <SelectItem value="Nail Care">{t('nailCare')}</SelectItem>
+              <SelectItem value="Makeup">{t('makeup')}</SelectItem>
+              <SelectItem value="Tools">{t('tools')}</SelectItem>
             </SelectContent>
           </Select>
           {errors.category && (
@@ -55,16 +57,16 @@ export const ProductDetailsForm = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="brand">Brand</Label>
+          <Label htmlFor="brand">{t('brandLabel')}</Label>
           <Input
             id="brand"
             {...register('brand')}
-            placeholder="Enter brand name"
+            placeholder={t('brandPlaceholder')}
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="supplier">Supplier</Label>
+          <Label htmlFor="supplier">{t('supplierLabel')}</Label>
           <Select
             value={selectedSupplier?.id || 'none'}
             onValueChange={(value) => {
@@ -77,10 +79,10 @@ export const ProductDetailsForm = ({
             }}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select supplier" />
+              <SelectValue placeholder={t('selectSupplier')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="none">No supplier</SelectItem>
+              <SelectItem value="none">{t('noSupplierOption')}</SelectItem>
               {suppliers.map(supplier => (
                 <SelectItem key={supplier.id} value={supplier.id}>
                   {supplier.name}
@@ -93,7 +95,7 @@ export const ProductDetailsForm = ({
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="price">Price *</Label>
+          <Label htmlFor="price">{t('priceLabel')}</Label>
           <Input
             id="price"
             type="number"
@@ -107,7 +109,7 @@ export const ProductDetailsForm = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="stockQuantity">Stock Quantity *</Label>
+          <Label htmlFor="stockQuantity">{t('stockQuantityLabel')}</Label>
           <Input
             id="stockQuantity"
             type="number"
@@ -120,7 +122,7 @@ export const ProductDetailsForm = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="lowStockThreshold">Low Stock Alert</Label>
+          <Label htmlFor="lowStockThreshold">{t('lowStockAlertLabel')}</Label>
           <Input
             id="lowStockThreshold"
             type="number"
@@ -134,18 +136,18 @@ export const ProductDetailsForm = ({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="status">Status *</Label>
+        <Label htmlFor="status">{t('statusLabel')}</Label>
         <Select
           value={status}
           onValueChange={(value) => setValue('status', value as 'active' | 'inactive' | 'draft')}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select status" />
+            <SelectValue placeholder={t('selectStatus')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
-            <SelectItem value="draft">Draft</SelectItem>
+            <SelectItem value="active">{t('active')}</SelectItem>
+            <SelectItem value="inactive">{t('inactive')}</SelectItem>
+            <SelectItem value="draft">{t('draft')}</SelectItem>
           </SelectContent>
         </Select>
         {errors.status && (

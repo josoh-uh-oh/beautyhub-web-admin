@@ -10,6 +10,7 @@ import { useProducts } from '@/hooks/useProducts';
 import { ProductList } from '@/components/salon/products/ProductList';
 import { ProductDialog } from '@/components/salon/products/ProductDialog';
 import { Product, ProductFormData } from '@/types/product';
+import { useLanguage } from '@/hooks/useLanguage';
 
 export const Products = () => {
   const {
@@ -29,6 +30,7 @@ export const Products = () => {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const { t } = useLanguage();
 
   const lowStockCount = products.filter(p => p.stockQuantity <= p.lowStockThreshold).length;
   const totalProducts = products.length;
@@ -63,7 +65,7 @@ export const Products = () => {
             <div className="flex items-center space-x-2">
               <Package className="h-5 w-5 text-orange-600" />
               <div>
-                <p className="text-sm text-gray-500">Total Products</p>
+                <p className="text-sm text-gray-500">{t('totalProducts')}</p>
                 <p className="text-2xl font-bold">{totalProducts}</p>
               </div>
             </div>
@@ -75,7 +77,7 @@ export const Products = () => {
             <div className="flex items-center space-x-2">
               <Package className="h-5 w-5 text-green-600" />
               <div>
-                <p className="text-sm text-gray-500">Active Products</p>
+                <p className="text-sm text-gray-500">{t('activeProducts')}</p>
                 <p className="text-2xl font-bold">{activeProducts}</p>
               </div>
             </div>
@@ -87,7 +89,7 @@ export const Products = () => {
             <div className="flex items-center space-x-2">
               <AlertTriangle className="h-5 w-5 text-red-600" />
               <div>
-                <p className="text-sm text-gray-500">Low Stock Alerts</p>
+                <p className="text-sm text-gray-500">{t('lowStockAlerts')}</p>
                 <p className="text-2xl font-bold">{lowStockCount}</p>
               </div>
             </div>
@@ -99,10 +101,10 @@ export const Products = () => {
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle>Product Inventory</CardTitle>
+            <CardTitle>{t('productInventory')}</CardTitle>
             <Button onClick={handleAddProduct} className="bg-orange-600 hover:bg-orange-700">
               <Plus className="h-4 w-4 mr-2" />
-              Add Product
+              {t('addProduct')}
             </Button>
           </div>
         </CardHeader>
@@ -113,7 +115,7 @@ export const Products = () => {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search products by name or SKU..."
+                placeholder={t('searchProductsPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -122,10 +124,10 @@ export const Products = () => {
             
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="All Categories" />
+                <SelectValue placeholder={t('allCategories')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="all">{t('allCategories')}</SelectItem>
                 {categories.map(category => (
                   <SelectItem key={category} value={category}>{category}</SelectItem>
                 ))}
@@ -134,13 +136,13 @@ export const Products = () => {
             
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="All Status" />
+                <SelectValue placeholder={t('allStatus')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="all">{t('allStatus')}</SelectItem>
+                <SelectItem value="active">{t('active')}</SelectItem>
+                <SelectItem value="inactive">{t('inactive')}</SelectItem>
+                <SelectItem value="draft">{t('draft')}</SelectItem>
               </SelectContent>
             </Select>
           </div>

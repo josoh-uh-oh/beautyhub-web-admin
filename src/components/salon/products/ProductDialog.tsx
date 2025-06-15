@@ -9,6 +9,7 @@ import { Product, ProductFormData, ProductSupplier } from '@/types/product';
 import { ProductBasicInfoForm } from './ProductBasicInfoForm';
 import { ProductDetailsForm } from './ProductDetailsForm';
 import { ProductVariantsForm } from './ProductVariantsForm';
+import { useLanguage } from '@/hooks/useLanguage';
 
 const variantSchema = z.object({
   id: z.string(),
@@ -47,6 +48,7 @@ interface ProductDialogProps {
 
 export const ProductDialog = ({ isOpen, onClose, onSave, product, categories, suppliers }: ProductDialogProps) => {
   const isEditing = !!product;
+  const { t } = useLanguage();
   
   const {
     register,
@@ -114,7 +116,7 @@ export const ProductDialog = ({ isOpen, onClose, onSave, product, categories, su
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? 'Edit Product' : 'Add New Product'}
+            {isEditing ? t('editProduct') : t('addProductTitle')}
           </DialogTitle>
         </DialogHeader>
 
@@ -143,14 +145,14 @@ export const ProductDialog = ({ isOpen, onClose, onSave, product, categories, su
 
           <div className="flex justify-end space-x-3 pt-4">
             <Button type="button" variant="outline" onClick={handleClose}>
-              Cancel
+              {t('cancel')}
             </Button>
             <Button 
               type="submit" 
               disabled={isSubmitting}
               className="bg-orange-600 hover:bg-orange-700"
             >
-              {isSubmitting ? 'Saving...' : (isEditing ? 'Update Product' : 'Create Product')}
+              {isSubmitting ? t('saving') : (isEditing ? t('updateProduct') : t('createProduct'))}
             </Button>
           </div>
         </form>

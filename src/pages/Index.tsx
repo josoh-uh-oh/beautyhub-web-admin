@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
@@ -13,9 +14,12 @@ import { Products } from '@/components/salon/Products';
 import { Services } from '@/components/salon/Services';
 import { StaffManagement } from '@/components/salon/StaffManagement';
 import { CustomerList } from '@/components/salon/customers/CustomerList';
+import { useLanguage } from '@/hooks/useLanguage';
+import { LanguageToggle } from '@/components/LanguageToggle';
 
 const Index = () => {
   const [activeView, setActiveView] = useState('dashboard');
+  const { t } = useLanguage();
 
   const renderContent = () => {
     switch (activeView) {
@@ -112,8 +116,9 @@ const Index = () => {
                  </div>
                 <div className="flex items-center space-x-3">
                   <Badge variant="secondary" className="bg-green-100 text-green-800">
-                    Pro Plan
+                    {t('proPlan')}
                   </Badge>
+                  <LanguageToggle />
                   <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
                     <span className="text-sm font-medium text-orange-800">SA</span>
                   </div>

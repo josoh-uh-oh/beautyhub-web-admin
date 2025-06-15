@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { MoreHorizontal, Edit, Trash2, AlertTriangle, Package } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Product } from '@/types/product';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface ProductListProps {
   products: Product[];
@@ -14,6 +15,8 @@ interface ProductListProps {
 }
 
 export const ProductList = ({ products, onEdit, onDelete }: ProductListProps) => {
+  const { t, language } = useLanguage();
+
   const getStatusBadge = (status: string) => {
     const variants = {
       active: 'bg-green-100 text-green-800',
@@ -24,16 +27,16 @@ export const ProductList = ({ products, onEdit, onDelete }: ProductListProps) =>
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat(language === 'jp' ? 'ja-JP' : 'en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: language === 'jp' ? 'JPY' : 'USD',
     }).format(price);
   };
 
   if (products.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-500">No products found. Add your first product to get started.</p>
+        <p className="text-gray-500">{t('noProductsFound')}</p>
       </div>
     );
   }
@@ -43,14 +46,14 @@ export const ProductList = ({ products, onEdit, onDelete }: ProductListProps) =>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Product</TableHead>
-            <TableHead>SKU</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Price</TableHead>
-            <TableHead>Stock</TableHead>
-            <TableHead>Variants</TableHead>
-            <TableHead>Supplier</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead>{t('product')}</TableHead>
+            <TableHead>{t('sku')}</TableHead>
+            <TableHead>{t('category')}</TableHead>
+            <TableHead>{t('price')}</TableHead>
+            <TableHead>{t('stock')}</TableHead>
+            <TableHead>{t('variants')}</TableHead>
+            <TableHead>{t('supplier')}</TableHead>
+            <TableHead>{t('status')}</TableHead>
             <TableHead className="w-12"></TableHead>
           </TableRow>
         </TableHeader>
@@ -104,19 +107,19 @@ export const ProductList = ({ products, onEdit, onDelete }: ProductListProps) =>
                     )}
                   </div>
                 ) : (
-                  <span className="text-gray-400 text-sm">No variants</span>
+                  <span className="text-gray-400 text-sm">{t('noVariants')}</span>
                 )}
               </TableCell>
               <TableCell>
                 {product.supplier ? (
                   <span className="text-sm">{product.supplier.name}</span>
                 ) : (
-                  <span className="text-gray-400 text-sm">No supplier</span>
+                  <span className="text-gray-400 text-sm">{t('noSupplier')}</span>
                 )}
               </TableCell>
               <TableCell>
                 <Badge className={getStatusBadge(product.status)}>
-                  {product.status}
+                  {t(product.status as 'active' | 'inactive' | 'draft')}
                 </Badge>
               </TableCell>
               <TableCell>
@@ -129,14 +132,14 @@ export const ProductList = ({ products, onEdit, onDelete }: ProductListProps) =>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => onEdit(product)}>
                       <Edit className="h-4 w-4 mr-2" />
-                      Edit
+                      {t('edit')}
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       onClick={() => onDelete(product.id)}
                       className="text-red-600"
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
+                      {t('delete')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

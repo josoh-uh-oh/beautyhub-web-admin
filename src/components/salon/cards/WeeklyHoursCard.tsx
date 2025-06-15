@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Clock } from 'lucide-react';
 import { DayScheduleRow } from './DayScheduleRow';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface TimeSlot {
   from: string;
@@ -29,14 +30,15 @@ export const WeeklyHoursCard = ({
   onAddTimeSlot,
   onRemoveTimeSlot
 }: WeeklyHoursCardProps) => {
+  const { t } = useLanguage();
   const daysOfWeek = [
-    { key: 'monday', label: 'Monday' },
-    { key: 'tuesday', label: 'Tuesday' },
-    { key: 'wednesday', label: 'Wednesday' },
-    { key: 'thursday', label: 'Thursday' },
-    { key: 'friday', label: 'Friday' },
-    { key: 'saturday', label: 'Saturday' },
-    { key: 'sunday', label: 'Sunday' }
+    { key: 'monday', label: t('monday') },
+    { key: 'tuesday', label: t('tuesday') },
+    { key: 'wednesday', label: t('wednesday') },
+    { key: 'thursday', label: t('thursday') },
+    { key: 'friday', label: t('friday') },
+    { key: 'saturday', label: t('saturday') },
+    { key: 'sunday', label: t('sunday') }
   ];
 
   return (
@@ -44,10 +46,10 @@ export const WeeklyHoursCard = ({
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
           <Clock className="w-5 h-5" />
-          <span>Standard Weekly Hours</span>
+          <span>{t('weeklyHoursTitle')}</span>
         </CardTitle>
         <CardDescription>
-          Set your salon's regular opening and closing times. This defines the overall availability for online booking and staff scheduling.
+          {t('weeklyHoursDescription')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

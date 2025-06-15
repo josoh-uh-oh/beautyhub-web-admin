@@ -3,11 +3,13 @@ import React, { useState } from "react";
 import { useCustomers } from "@/hooks/useCustomers";
 import CustomerDialog from "./CustomerDialog";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export const CustomerList = () => {
   const { customers, setSearch, search } = useCustomers();
   const [selected, setSelected] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const { t } = useLanguage();
 
   return (
     <div className="w-full max-w-3xl mx-auto">
@@ -16,17 +18,17 @@ export const CustomerList = () => {
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="border rounded px-3 py-2"
-          placeholder="検索: 名前・ふりがな・電話・Email"
+          placeholder={t('searchPlaceholder')}
         />
-        <Button variant="default">+ 新規顧客</Button>
+        <Button variant="default">{t('newCustomer')}</Button>
       </div>
       <div className="bg-white rounded shadow border">
         <table className="w-full text-left">
           <thead>
             <tr className="bg-orange-50">
-              <th className="p-2 font-medium">名前</th>
-              <th className="p-2 font-medium">電話番号</th>
-              <th className="p-2 font-medium">最終利用日</th>
+              <th className="p-2 font-medium">{t('customerName')}</th>
+              <th className="p-2 font-medium">{t('customerPhone')}</th>
+              <th className="p-2 font-medium">{t('customerLastVisit')}</th>
               <th className="p-2 font-medium"></th>
             </tr>
           </thead>
@@ -37,7 +39,7 @@ export const CustomerList = () => {
                 <td className="p-2">{c.phone || "—"}</td>
                 <td className="p-2">{c.history?.[0]?.date || "—"}</td>
                 <td className="p-2">
-                  <Button size="sm" onClick={() => {setSelected(c); setModalOpen(true)}}>詳細</Button>
+                  <Button size="sm" onClick={() => {setSelected(c); setModalOpen(true)}}>{t('customerDetails')}</Button>
                 </td>
               </tr>
             ))}
