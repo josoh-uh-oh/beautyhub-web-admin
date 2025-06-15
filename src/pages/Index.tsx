@@ -9,6 +9,7 @@ import { OnlineBookingSettings } from '@/components/salon/OnlineBookingSettings'
 import { IntegrationsSettings } from '@/components/salon/IntegrationsSettings';
 import { SubscriptionBilling } from '@/components/salon/SubscriptionBilling';
 import { Dashboard } from '@/components/salon/Dashboard';
+import { Calendar } from '@/components/salon/Calendar';
 import { Products } from '@/components/salon/Products';
 import { Services } from '@/components/salon/Services';
 import { StaffManagement } from '@/components/salon/StaffManagement';
@@ -20,6 +21,8 @@ const Index = () => {
     switch (activeView) {
       case 'dashboard':
         return <Dashboard />;
+      case 'calendar':
+        return <Calendar />;
       case 'business/profile':
         return <SalonProfileSettings />;
       case 'business/hours':
@@ -45,6 +48,10 @@ const Index = () => {
     dashboard: {
       title: "Dashboard",
       description: "A quick overview of your salon's performance.",
+    },
+    calendar: {
+      title: "Calendar",
+      description: "Manage appointments and staff schedules.",
     },
     'business/profile': {
       title: "Salon Profile",

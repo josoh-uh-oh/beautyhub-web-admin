@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 
 const menuConfig = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid, path: 'dashboard' },
+  { id: 'calendar', label: 'Calendar', icon: Calendar, path: 'calendar' },
   { 
     id: 'business', 
     label: 'Business', 
