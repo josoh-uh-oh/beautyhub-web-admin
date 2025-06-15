@@ -1,27 +1,41 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Product, ProductFormData } from '@/types/product';
+import { Plus, Trash2 } from 'lucide-react';
+import { Product, ProductFormData, ProductSupplier, ProductVariant } from '@/types/product';
+
+const variantSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1, 'Variant name is required'),
+  value: z.string().min(1, 'Variant value is required'),
+  stockQuantity: z.number().int().min(0, 'Stock quantity must be 0 or greater'),
+});
 
 const productSchema = z.object({
   name: z.string().min(1, 'Product name is required'),
   description: z.string().min(1, 'Description is required'),
   sku: z.string().min(1, 'SKU is required'),
   price: z.number().min(0.01, 'Price must be greater than 0'),
-  costPrice: z.number().min(0, 'Cost price must be 0 or greater'),
   category: z.string().min(1, 'Category is required'),
   brand: z.string().optional(),
   stockQuantity: z.number().int().min(0, 'Stock quantity must be 0 or greater'),
   lowStockThreshold: z.number().int().min(0, 'Low stock threshold must be 0 or greater'),
   status: z.enum(['active', 'inactive', 'draft']),
+  variants: z.array(variantSchema),
+  supplier: z.object({
+    id: z.string(),
+    name: z.string(),
+    contactEmail: z.string().optional(),
+    contactPhone: z.string().optional(),
+  }).optional(),
 });
 
 interface ProductDialogProps {
@@ -30,9 +44,10 @@ interface ProductDialogProps {
   onSave: (data: ProductFormData | { id: string; data: Partial<ProductFormData> }) => void;
   product?: Product | null;
   categories: string[];
+  suppliers: ProductSupplier[];
 }
 
-export const ProductDialog = ({ isOpen, onClose, onSave, product, categories }: ProductDialogProps) => {
+export const ProductDialog = ({ isOpen, onClose, onSave, product, categories, suppliers }: ProductDialogProps) => {
   const isEditing = !!product;
   
   const {
@@ -41,6 +56,7 @@ export const ProductDialog = ({ isOpen, onClose, onSave, product, categories }: 
     reset,
     setValue,
     watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -49,34 +65,51 @@ export const ProductDialog = ({ isOpen, onClose, onSave, product, categories }: 
       description: product.description,
       sku: product.sku,
       price: product.price,
-      costPrice: product.costPrice,
       category: product.category,
       brand: product.brand || '',
       stockQuantity: product.stockQuantity,
       lowStockThreshold: product.lowStockThreshold,
       status: product.status,
+      variants: product.variants,
+      supplier: product.supplier,
     } : {
       name: '',
       description: '',
       sku: '',
       price: 0,
-      costPrice: 0,
       category: '',
       brand: '',
       stockQuantity: 0,
       lowStockThreshold: 5,
       status: 'draft' as const,
+      variants: [],
+      supplier: undefined,
     },
   });
 
+  const { fields: variantFields, append: appendVariant, remove: removeVariant } = useFieldArray({
+    control,
+    name: 'variants',
+  });
+
   const status = watch('status');
+  const selectedSupplier = watch('supplier');
+
+  const addVariant = () => {
+    appendVariant({
+      id: Date.now().toString(),
+      name: '',
+      value: '',
+      stockQuantity: 0,
+    });
+  };
 
   const onSubmit = async (data: ProductFormData) => {
     try {
       if (isEditing && product) {
-        await onSave({ id: product.id, data });
+        onSave({ id: product.id, data });
       } else {
-        await onSave(data);
+        onSave(data);
       }
       reset();
       onClose();
@@ -92,7 +125,7 @@ export const ProductDialog = ({ isOpen, onClose, onSave, product, categories }: 
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {isEditing ? 'Edit Product' : 'Add New Product'}
@@ -139,7 +172,7 @@ export const ProductDialog = ({ isOpen, onClose, onSave, product, categories }: 
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="category">Category *</Label>
               <Select
@@ -173,11 +206,34 @@ export const ProductDialog = ({ isOpen, onClose, onSave, product, categories }: 
                 placeholder="Enter brand name"
               />
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="supplier">Supplier</Label>
+              <Select
+                value={selectedSupplier?.id || ''}
+                onValueChange={(value) => {
+                  const supplier = suppliers.find(s => s.id === value);
+                  setValue('supplier', supplier);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select supplier" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">No supplier</SelectItem>
+                  {suppliers.map(supplier => (
+                    <SelectItem key={supplier.id} value={supplier.id}>
+                      {supplier.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="price">Selling Price *</Label>
+              <Label htmlFor="price">Price *</Label>
               <Input
                 id="price"
                 type="number"
@@ -190,22 +246,6 @@ export const ProductDialog = ({ isOpen, onClose, onSave, product, categories }: 
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="costPrice">Cost Price</Label>
-              <Input
-                id="costPrice"
-                type="number"
-                step="0.01"
-                {...register('costPrice', { valueAsNumber: true })}
-                placeholder="0.00"
-              />
-              {errors.costPrice && (
-                <p className="text-sm text-red-600">{errors.costPrice.message}</p>
-              )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="stockQuantity">Stock Quantity *</Label>
               <Input
@@ -251,6 +291,67 @@ export const ProductDialog = ({ isOpen, onClose, onSave, product, categories }: 
             {errors.status && (
               <p className="text-sm text-red-600">{errors.status.message}</p>
             )}
+          </div>
+
+          {/* Product Variants Section */}
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <Label>Product Variants</Label>
+              <Button type="button" variant="outline" size="sm" onClick={addVariant}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Variant
+              </Button>
+            </div>
+            
+            {variantFields.map((field, index) => (
+              <div key={field.id} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border rounded-lg">
+                <div className="space-y-2">
+                  <Label>Variant Name</Label>
+                  <Input
+                    {...register(`variants.${index}.name`)}
+                    placeholder="e.g., Size, Color"
+                  />
+                  {errors.variants?.[index]?.name && (
+                    <p className="text-sm text-red-600">{errors.variants[index]?.name?.message}</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Variant Value</Label>
+                  <Input
+                    {...register(`variants.${index}.value`)}
+                    placeholder="e.g., Large, Red"
+                  />
+                  {errors.variants?.[index]?.value && (
+                    <p className="text-sm text-red-600">{errors.variants[index]?.value?.message}</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Stock</Label>
+                  <Input
+                    type="number"
+                    {...register(`variants.${index}.stockQuantity`, { valueAsNumber: true })}
+                    placeholder="0"
+                  />
+                  {errors.variants?.[index]?.stockQuantity && (
+                    <p className="text-sm text-red-600">{errors.variants[index]?.stockQuantity?.message}</p>
+                  )}
+                </div>
+                
+                <div className="flex items-end">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => removeVariant(index)}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
           </div>
 
           <div className="flex justify-end space-x-3 pt-4">

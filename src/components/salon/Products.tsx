@@ -9,7 +9,7 @@ import { Plus, Search, Package, AlertTriangle } from 'lucide-react';
 import { useProducts } from '@/hooks/useProducts';
 import { ProductList } from '@/components/salon/products/ProductList';
 import { ProductDialog } from '@/components/salon/products/ProductDialog';
-import { Product } from '@/types/product';
+import { Product, ProductFormData } from '@/types/product';
 
 export const Products = () => {
   const {
@@ -24,6 +24,7 @@ export const Products = () => {
     updateProduct,
     deleteProduct,
     categories,
+    suppliers,
   } = useProducts();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -41,6 +42,16 @@ export const Products = () => {
   const handleEditProduct = (product: Product) => {
     setEditingProduct(product);
     setIsDialogOpen(true);
+  };
+
+  const handleSaveProduct = (data: ProductFormData | { id: string; data: Partial<ProductFormData> }) => {
+    if ('id' in data) {
+      // Editing existing product
+      updateProduct(data.id, data.data);
+    } else {
+      // Adding new product
+      addProduct(data);
+    }
   };
 
   return (
@@ -147,9 +158,10 @@ export const Products = () => {
       <ProductDialog
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
-        onSave={editingProduct ? updateProduct : addProduct}
+        onSave={handleSaveProduct}
         product={editingProduct}
         categories={categories}
+        suppliers={suppliers}
       />
     </div>
   );

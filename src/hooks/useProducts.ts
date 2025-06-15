@@ -1,6 +1,22 @@
 
 import { useState, useCallback } from 'react';
-import { Product, ProductFormData } from '@/types/product';
+import { Product, ProductFormData, ProductSupplier } from '@/types/product';
+
+// Mock suppliers
+const mockSuppliers: ProductSupplier[] = [
+  {
+    id: '1',
+    name: 'Beauty Supply Co.',
+    contactEmail: 'orders@beautysupply.com',
+    contactPhone: '+1-555-0123',
+  },
+  {
+    id: '2',
+    name: 'Professional Hair Products',
+    contactEmail: 'sales@profhair.com',
+    contactPhone: '+1-555-0456',
+  },
+];
 
 // Mock data for demonstration
 const mockProducts: Product[] = [
@@ -10,13 +26,17 @@ const mockProducts: Product[] = [
     description: 'Professional keratin shampoo for damaged hair',
     sku: 'HS-KC-500',
     price: 29.99,
-    costPrice: 15.00,
     category: 'Hair Care',
     brand: 'Keratin Pro',
     stockQuantity: 45,
     lowStockThreshold: 10,
-    images: ['https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400'],
+    images: ['https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400&h=400&fit=crop'],
     status: 'active',
+    variants: [
+      { id: 'v1', name: 'Size', value: '250ml', stockQuantity: 25 },
+      { id: 'v2', name: 'Size', value: '500ml', stockQuantity: 20 },
+    ],
+    supplier: mockSuppliers[0],
     createdAt: new Date('2024-01-15'),
     updatedAt: new Date('2024-01-15'),
   },
@@ -26,13 +46,17 @@ const mockProducts: Product[] = [
     description: 'Long-lasting gel nail polish in ruby red',
     sku: 'NP-RR-15',
     price: 12.99,
-    costPrice: 6.50,
     category: 'Nail Care',
     brand: 'Beauty Nails',
     stockQuantity: 3,
     lowStockThreshold: 5,
-    images: ['https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=400'],
+    images: ['https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=400&h=400&fit=crop'],
     status: 'active',
+    variants: [
+      { id: 'v3', name: 'Finish', value: 'Glossy', stockQuantity: 2 },
+      { id: 'v4', name: 'Finish', value: 'Matte', stockQuantity: 1 },
+    ],
+    supplier: mockSuppliers[1],
     createdAt: new Date('2024-01-10'),
     updatedAt: new Date('2024-01-10'),
   }
@@ -82,6 +106,7 @@ export const useProducts = () => {
   }, [products]);
 
   const categories = Array.from(new Set(products.map(p => p.category)));
+  const suppliers = mockSuppliers;
 
   return {
     products: filteredProducts,
@@ -97,5 +122,6 @@ export const useProducts = () => {
     deleteProduct,
     getProduct,
     categories,
+    suppliers,
   };
 };
