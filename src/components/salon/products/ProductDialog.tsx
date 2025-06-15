@@ -1,16 +1,14 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Trash2 } from 'lucide-react';
-import { Product, ProductFormData, ProductSupplier, ProductVariant } from '@/types/product';
+import { Product, ProductFormData, ProductSupplier } from '@/types/product';
+import { ProductBasicInfoForm } from './ProductBasicInfoForm';
+import { ProductDetailsForm } from './ProductDetailsForm';
+import { ProductVariantsForm } from './ProductVariantsForm';
 
 const variantSchema = z.object({
   id: z.string(),
@@ -92,18 +90,6 @@ export const ProductDialog = ({ isOpen, onClose, onSave, product, categories, su
     name: 'variants',
   });
 
-  const status = watch('status');
-  const selectedSupplier = watch('supplier');
-
-  const addVariant = () => {
-    appendVariant({
-      id: Date.now().toString(),
-      name: '',
-      value: '',
-      stockQuantity: 0,
-    });
-  };
-
   const onSubmit = async (data: ProductFormData) => {
     try {
       if (isEditing && product) {
@@ -133,226 +119,27 @@ export const ProductDialog = ({ isOpen, onClose, onSave, product, categories, su
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Product Name *</Label>
-              <Input
-                id="name"
-                {...register('name')}
-                placeholder="Enter product name"
-              />
-              {errors.name && (
-                <p className="text-sm text-red-600">{errors.name.message}</p>
-              )}
-            </div>
+          <ProductBasicInfoForm 
+            register={register} 
+            errors={errors} 
+          />
 
-            <div className="space-y-2">
-              <Label htmlFor="sku">SKU *</Label>
-              <Input
-                id="sku"
-                {...register('sku')}
-                placeholder="Enter SKU"
-              />
-              {errors.sku && (
-                <p className="text-sm text-red-600">{errors.sku.message}</p>
-              )}
-            </div>
-          </div>
+          <ProductDetailsForm
+            register={register}
+            setValue={setValue}
+            watch={watch}
+            errors={errors}
+            categories={categories}
+            suppliers={suppliers}
+          />
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description *</Label>
-            <Textarea
-              id="description"
-              {...register('description')}
-              placeholder="Enter product description"
-              rows={3}
-            />
-            {errors.description && (
-              <p className="text-sm text-red-600">{errors.description.message}</p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="category">Category *</Label>
-              <Select
-                value={watch('category')}
-                onValueChange={(value) => setValue('category', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map(category => (
-                    <SelectItem key={category} value={category}>{category}</SelectItem>
-                  ))}
-                  <SelectItem value="Hair Care">Hair Care</SelectItem>
-                  <SelectItem value="Skin Care">Skin Care</SelectItem>
-                  <SelectItem value="Nail Care">Nail Care</SelectItem>
-                  <SelectItem value="Makeup">Makeup</SelectItem>
-                  <SelectItem value="Tools">Tools</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.category && (
-                <p className="text-sm text-red-600">{errors.category.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="brand">Brand</Label>
-              <Input
-                id="brand"
-                {...register('brand')}
-                placeholder="Enter brand name"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="supplier">Supplier</Label>
-              <Select
-                value={selectedSupplier?.id || ''}
-                onValueChange={(value) => {
-                  const supplier = suppliers.find(s => s.id === value);
-                  setValue('supplier', supplier);
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select supplier" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">No supplier</SelectItem>
-                  {suppliers.map(supplier => (
-                    <SelectItem key={supplier.id} value={supplier.id}>
-                      {supplier.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="price">Price *</Label>
-              <Input
-                id="price"
-                type="number"
-                step="0.01"
-                {...register('price', { valueAsNumber: true })}
-                placeholder="0.00"
-              />
-              {errors.price && (
-                <p className="text-sm text-red-600">{errors.price.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="stockQuantity">Stock Quantity *</Label>
-              <Input
-                id="stockQuantity"
-                type="number"
-                {...register('stockQuantity', { valueAsNumber: true })}
-                placeholder="0"
-              />
-              {errors.stockQuantity && (
-                <p className="text-sm text-red-600">{errors.stockQuantity.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="lowStockThreshold">Low Stock Alert</Label>
-              <Input
-                id="lowStockThreshold"
-                type="number"
-                {...register('lowStockThreshold', { valueAsNumber: true })}
-                placeholder="5"
-              />
-              {errors.lowStockThreshold && (
-                <p className="text-sm text-red-600">{errors.lowStockThreshold.message}</p>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="status">Status *</Label>
-            <Select
-              value={status}
-              onValueChange={(value) => setValue('status', value as 'active' | 'inactive' | 'draft')}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-              </SelectContent>
-            </Select>
-            {errors.status && (
-              <p className="text-sm text-red-600">{errors.status.message}</p>
-            )}
-          </div>
-
-          {/* Product Variants Section */}
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <Label>Product Variants</Label>
-              <Button type="button" variant="outline" size="sm" onClick={addVariant}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Variant
-              </Button>
-            </div>
-            
-            {variantFields.map((field, index) => (
-              <div key={field.id} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border rounded-lg">
-                <div className="space-y-2">
-                  <Label>Variant Name</Label>
-                  <Input
-                    {...register(`variants.${index}.name`)}
-                    placeholder="e.g., Size, Color"
-                  />
-                  {errors.variants?.[index]?.name && (
-                    <p className="text-sm text-red-600">{errors.variants[index]?.name?.message}</p>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label>Variant Value</Label>
-                  <Input
-                    {...register(`variants.${index}.value`)}
-                    placeholder="e.g., Large, Red"
-                  />
-                  {errors.variants?.[index]?.value && (
-                    <p className="text-sm text-red-600">{errors.variants[index]?.value?.message}</p>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label>Stock</Label>
-                  <Input
-                    type="number"
-                    {...register(`variants.${index}.stockQuantity`, { valueAsNumber: true })}
-                    placeholder="0"
-                  />
-                  {errors.variants?.[index]?.stockQuantity && (
-                    <p className="text-sm text-red-600">{errors.variants[index]?.stockQuantity?.message}</p>
-                  )}
-                </div>
-                
-                <div className="flex items-end">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => removeVariant(index)}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
+          <ProductVariantsForm
+            register={register}
+            errors={errors}
+            variantFields={variantFields}
+            appendVariant={appendVariant}
+            removeVariant={removeVariant}
+          />
 
           <div className="flex justify-end space-x-3 pt-4">
             <Button type="button" variant="outline" onClick={handleClose}>
