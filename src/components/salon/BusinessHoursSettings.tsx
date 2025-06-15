@@ -90,6 +90,15 @@ export const BusinessHoursSettings = () => {
   };
 
   const removeTimeSlot = (day: string, slotIndex: number) => {
+    if (schedule[day].slots.length <= 1) {
+      toast({
+        title: "Cannot remove slot",
+        description: "At least one time slot is required when the day is open.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setSchedule(prev => ({
       ...prev,
       [day]: {
@@ -99,23 +108,75 @@ export const BusinessHoursSettings = () => {
     }));
   };
 
-  const addSpecialClosure = () => {
-    if (newClosure.date && newClosure.description) {
-      setSpecialClosures(prev => [
-        ...prev,
-        {
-          id: Date.now().toString(),
-          date: newClosure.date,
-          description: newClosure.description
-        }
-      ]);
-      setNewClosure({ date: '', description: '' });
-      setIsAddClosureOpen(false);
-      toast({
-        title: "Special closure added",
-        description: "The closure date has been added to your calendar.",
-      });
+  const validateTimeSlots = (slots: TimeSlot[]): boolean => {
+    for (const slot of slots) {
+      if (slot.from >= slot.to) {
+        return false;
+      }
     }
+    
+    // Check for overlapping slots
+    const sortedSlots = [...slots].sort((a, b) => a.from.localeCompare(b.from));
+    for (let i = 0; i < sortedSlots.length - 1; i++) {
+      if (sortedSlots[i].to > sortedSlots[i + 1].from) {
+        return false;
+      }
+    }
+    
+    return true;
+  };
+
+  const addSpecialClosure = () => {
+    if (!newClosure.date || !newClosure.description.trim()) {
+      toast({
+        title: "Invalid input",
+        description: "Please provide both date and description for the special closure.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Check if date is not in the past
+    const selectedDate = new Date(newClosure.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (selectedDate < today) {
+      toast({
+        title: "Invalid date",
+        description: "Cannot add closure for a past date.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Check for duplicate dates
+    const isDuplicate = specialClosures.some(closure => closure.date === newClosure.date);
+    if (isDuplicate) {
+      toast({
+        title: "Duplicate date",
+        description: "A closure already exists for this date.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setSpecialClosures(prev => [
+      ...prev,
+      {
+        id: Date.now().toString(),
+        date: newClosure.date,
+        description: newClosure.description.trim()
+      }
+    ]);
+    
+    setNewClosure({ date: '', description: '' });
+    setIsAddClosureOpen(false);
+    
+    toast({
+      title: "Special closure added",
+      description: "The closure date has been added to your calendar.",
+    });
   };
 
   const removeSpecialClosure = (id: string) => {
@@ -127,9 +188,32 @@ export const BusinessHoursSettings = () => {
   };
 
   const handleSave = () => {
+    // Validate all time slots
+    for (const [day, daySchedule] of Object.entries(schedule)) {
+      if (daySchedule.isOpen && !validateTimeSlots(daySchedule.slots)) {
+        toast({
+          title: "Invalid time configuration",
+          description: `Please check the time slots for ${day}. Times cannot overlap and end time must be after start time.`,
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+
+    // Here you would typically save to your backend
+    console.log('Saving business hours:', { schedule, specialClosures });
+    
     toast({
       title: "Business hours saved",
       description: "Your business hours and special closures have been updated successfully!",
+    });
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
   };
 
@@ -155,14 +239,21 @@ export const BusinessHoursSettings = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           {daysOfWeek.map((day) => (
-            <div key={day.key} className="flex items-center space-x-4 p-4 border rounded-lg">
-              <div className="w-20 font-medium text-sm">
+            <div key={day.key} className="flex items-start space-x-4 p-4 border rounded-lg">
+              <div className="w-20 font-medium text-sm pt-2">
                 {day.label}
               </div>
-              <Switch
-                checked={schedule[day.key].isOpen}
-                onCheckedChange={() => toggleDay(day.key)}
-              />
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={schedule[day.key].isOpen}
+                    onCheckedChange={() => toggleDay(day.key)}
+                  />
+                  <Label className="text-sm">
+                    {schedule[day.key].isOpen ? 'Open' : 'Closed'}
+                  </Label>
+                </div>
+              </div>
               {schedule[day.key].isOpen ? (
                 <div className="flex-1 space-y-2">
                   {schedule[day.key].slots.map((slot, slotIndex) => (
@@ -173,7 +264,7 @@ export const BusinessHoursSettings = () => {
                         onChange={(e) => updateTimeSlot(day.key, slotIndex, 'from', e.target.value)}
                         className="w-32"
                       />
-                      <span className="text-gray-500">to</span>
+                      <span className="text-gray-500 text-sm">to</span>
                       <Input
                         type="time"
                         value={slot.to}
@@ -185,6 +276,7 @@ export const BusinessHoursSettings = () => {
                           variant="outline"
                           size="sm"
                           onClick={() => removeTimeSlot(day.key, slotIndex)}
+                          className="text-red-600 hover:text-red-700"
                         >
                           <X className="w-4 h-4" />
                         </Button>
@@ -202,7 +294,7 @@ export const BusinessHoursSettings = () => {
                   </Button>
                 </div>
               ) : (
-                <div className="flex-1 text-gray-500 text-sm">Closed</div>
+                <div className="flex-1 text-gray-500 text-sm pt-2">Closed</div>
               )}
             </div>
           ))}
@@ -239,6 +331,7 @@ export const BusinessHoursSettings = () => {
                       type="date"
                       value={newClosure.date}
                       onChange={(e) => setNewClosure(prev => ({ ...prev, date: e.target.value }))}
+                      min={new Date().toISOString().split('T')[0]}
                     />
                   </div>
                   <div className="space-y-2">
@@ -248,6 +341,7 @@ export const BusinessHoursSettings = () => {
                       placeholder="e.g., New Year's Day, Staff Training"
                       value={newClosure.description}
                       onChange={(e) => setNewClosure(prev => ({ ...prev, description: e.target.value }))}
+                      maxLength={100}
                     />
                   </div>
                 </div>
@@ -277,21 +371,25 @@ export const BusinessHoursSettings = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {specialClosures.map((closure) => (
-                  <TableRow key={closure.id}>
-                    <TableCell>{new Date(closure.date).toLocaleDateString()}</TableCell>
-                    <TableCell>{closure.description}</TableCell>
-                    <TableCell>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => removeSpecialClosure(closure.id)}
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {specialClosures
+                  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                  .map((closure) => (
+                    <TableRow key={closure.id}>
+                      <TableCell className="font-medium">
+                        {formatDate(closure.date)}
+                      </TableCell>
+                      <TableCell>{closure.description}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => removeSpecialClosure(closure.id)}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           ) : (
