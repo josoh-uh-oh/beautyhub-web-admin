@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
-import { Tabs, TabList, Tab, TabPanel } from "@radix-ui/react-tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Customer } from "@/types/customer";
 
 interface Props {
@@ -32,15 +32,15 @@ export const CustomerDialog = ({ open, onOpenChange, customer }: Props) => {
         </DialogHeader>
         <div className="pt-3">
           <Tabs value={tab} onValueChange={setTab}>
-            <TabList className="flex gap-4 border-b mb-4">
+            <TabsList className="flex gap-4 border-b mb-4">
               {tabs.map(t => (
-                <Tab key={t.key} value={t.key} className={tab === t.key ? "border-b-2 border-orange-400 font-bold" : ""}>
+                <TabsTrigger key={t.key} value={t.key} className={tab === t.key ? "border-b-2 border-orange-400 font-bold" : ""}>
                   {t.label}
-                </Tab>
+                </TabsTrigger>
               ))}
-            </TabList>
+            </TabsList>
 
-            <TabPanel value="overview">
+            <TabsContent value="overview">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <div className="mb-1 text-gray-500">電話番号 / Email</div>
@@ -58,19 +58,19 @@ export const CustomerDialog = ({ open, onOpenChange, customer }: Props) => {
               <div className="mt-4">
                 <KaruteSection karute={customer.karute} />
               </div>
-            </TabPanel>
+            </TabsContent>
 
-            <TabPanel value="history">
+            <TabsContent value="history">
               <HistorySection history={customer.history ?? []} />
-            </TabPanel>
+            </TabsContent>
 
-            <TabPanel value="photos">
+            <TabsContent value="photos">
               <PhotosSection photos={customer.photos ?? []} />
-            </TabPanel>
+            </TabsContent>
 
-            <TabPanel value="notes">
+            <TabsContent value="notes">
               <NotesSection notes={customer.notes ?? []} />
-            </TabPanel>
+            </TabsContent>
           </Tabs>
         </div>
       </DialogContent>
